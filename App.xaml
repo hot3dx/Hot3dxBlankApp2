@@ -11,7 +11,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="ms-appx:///Assets/Hot3dxStyles.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Hot3dxStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
