@@ -54,6 +54,10 @@ namespace winrt::Hot3dxBlankApp2::implementation
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
+        // event handler for swapChainPanel Loaded
+        void OnSwapChainPanelLoaded(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const& args);
+
+
         void ClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
         void Button_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
@@ -87,11 +91,11 @@ namespace winrt::Hot3dxBlankApp2::implementation
 
         
         // Resources used to render the DirectX content in the XAML page background.
+       
+        winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swapChainPanel{ nullptr }; // member, not namespace-scope
         std::shared_ptr<DeviceResources> m_deviceResources;
-        std::unique_ptr<Hot3dxBlankApp2::Hot3dxBlankApp2Main> m_main;
-
-
-        bool m_windowVisible = false;
+        std::unique_ptr<Hot3dxBlankApp2Main> m_main;
+        bool m_windowVisible{ false };
        
        
     };
