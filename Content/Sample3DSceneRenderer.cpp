@@ -46,7 +46,7 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 {
 	LoadState();
 	ZeroMemory(&m_constantBufferData, sizeof(m_constantBufferData));
-
+	CreateWindowSizeDependentResources();
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
@@ -60,7 +60,7 @@ Sample3DSceneRenderer::~Sample3DSceneRenderer()
 winrt::Windows::Foundation::IAsyncAction Sample3DSceneRenderer::CreateDeviceDependentResources()
 {
 	auto d3dDevice = m_deviceResources->GetD3DDevice();
-
+	
 	// Create a root signature with a single constant buffer slot.
 	{
 		CD3DX12_DESCRIPTOR_RANGE range{};

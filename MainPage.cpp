@@ -2,21 +2,29 @@
 #include "MainPage.h"
 #include "MainPage.g.cpp"
 
+// if you need native interop checks
+//#include <windows.ui.xaml.media.dxinterop.h> 
+
 using namespace winrt;
 using namespace winrt::Windows::UI::Xaml;
 using namespace winrt::Windows::UI::Xaml::Controls;
-using namespace winrt::Hot3dxBlankApp2;
+using namespace winrt::Hot3dxBlankApp2::implementation;
 
 namespace winrt::Hot3dxBlankApp2::implementation
 {
+
     MainPage::MainPage()
     {
         // create DeviceResources first
         m_deviceResources = std::make_shared<DeviceResources>();
 
         // create the SwapChainPanel instance (member) and hook Loaded
-        m_swapChainPanel = swapChainPanel();
+        *m_deviceResources->m_swapChainPanel = swapChainPanel();
+
         swapChainPanel().Loaded({ this, &MainPage::OnSwapChainPanelLoaded });
+
+        m_swapChainPanel.Loaded({this, &MainPage::OnSwapChainPanelLoaded});
+
 
         // add the panel to the visual tree
         Content(m_swapChainPanel);
@@ -32,7 +40,8 @@ namespace winrt::Hot3dxBlankApp2::implementation
         m_deviceResources->SetWindow(window.CoreWindow());
 
         // Give DeviceResources the panel (it should call SetSwapChain / ISwapChainPanelNative inside)
-        m_deviceResources->SetSwapChainPanel(&swapChainPanel(), window.CoreWindow());
+
+        m_deviceResources->SetSwapChainPanel(&m_swapChainPanel, window.CoreWindow());
 
         // create/render only after swapchain panel is attached
         m_main = std::make_unique<Hot3dxBlankApp2Main>(m_deviceResources);

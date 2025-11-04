@@ -1,5 +1,5 @@
-﻿#include "pch.h"
-
+﻿﻿// cpp Common-DeviceResources.cpp
+#include "pch.h"
 
 #include "d3dx12.h"
 #include "DeviceResources.h"
@@ -11,14 +11,13 @@
 #include <synchapi.h>
 #include <unknwn.h>
 #include <winrt/windows.foundation.h>
+#include <algorithm>
 
 #include <winrt/windows.graphics.display.h>
 #include <winrt/windows.ui.core.h>
 #include <winrt/windows.ui.xaml.controls.h>
-//#include <windows.ui.xaml.media.dxinterop.h>
 
 using namespace DirectX;
-using namespace Microsoft::WRL;
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Graphics::Display;
@@ -27,55 +26,42 @@ using namespace winrt::Windows::UI::Xaml::Controls;
 
 namespace DisplayMetrics
 {
-	// High resolution displays can require a lot of GPU and battery power to render.
-	// High resolution phones, for example, may suffer from poor battery life if
-	// games attempt to render at 60 frames per second at full fidelity.
-	// The decision to render at full fidelity across all platforms and form factors
-	// should be deliberate.
 	static const bool SupportHighResolutions = false;
-
-	// The default thresholds that define a "high resolution" display. If the thresholds
-	// are exceeded and SupportHighResolutions is false, the dimensions will be scaled
-	// by 50%.
-	static const float DpiThreshold = 192.0f;		// 200% of standard desktop display.
-	static const float WidthThreshold = 1920.0f;	// 1080p width.
-	static const float HeightThreshold = 1080.0f;	// 1080p height.
+	static const float DpiThreshold = 192.0f;
+	static const float WidthThreshold = 1920.0f;
+	static const float HeightThreshold = 1080.0f;
 };
 
-// Constants used to calculate screen rotations.
+// ScreenRotation constants (unchanged)
 namespace ScreenRotation
 {
-	// 0-degree Z-rotation
 	static const XMFLOAT4X4 Rotation0(
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
-	// 90-degree Z-rotation
 	static const XMFLOAT4X4 Rotation90(
 		0.0f, 1.0f, 0.0f, 0.0f,
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
-	// 180-degree Z-rotation
 	static const XMFLOAT4X4 Rotation180(
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
-	// 270-degree Z-rotation
 	static const XMFLOAT4X4 Rotation270(
 		0.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 };
 
 // Constructor for DeviceResources.
@@ -83,7 +69,7 @@ DX::DeviceResources::DeviceResources(DXGI_FORMAT backBufferFormat, DXGI_FORMAT d
 	m_currentFrame(0),
 	m_screenViewport(),
 	m_rtvDescriptorSize(0),
-	m_fenceEvent(0),
+	m_fenceEvent(nullptr),
 	m_backBufferFormat(backBufferFormat),
 	m_depthBufferFormat(depthBufferFormat),
 	m_fenceValues{},
@@ -104,17 +90,15 @@ DX::DeviceResources::DeviceResources(DXGI_FORMAT backBufferFormat, DXGI_FORMAT d
 void DX::DeviceResources::SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel* panel, winrt::Windows::UI::Core::CoreWindow const& window)
 {
 	m_swapChainPanel = panel;
-	
+
 	DisplayInformation currentDisplayInformation = DisplayInformation::GetForCurrentView();
 
-	//winrt::Windows::UI::Core::CoreWindow window = m_window.get();
 	m_logicalSize = winrt::Windows::Foundation::Size(window.Bounds().Width, window.Bounds().Height);
 	m_nativeOrientation = currentDisplayInformation.NativeOrientation();
 	m_currentOrientation = currentDisplayInformation.CurrentOrientation();
 	m_dpi = currentDisplayInformation.LogicalDpi();
 
-	CreateWindowSizeDependentResources();
-
+	//CreateWindowSizeDependentResources();
 }
 
 // Configures resources that don't depend on the Direct3D device.
@@ -128,8 +112,7 @@ void DX::DeviceResources::CreateDeviceResources()
 #if defined(_DEBUG)
 	// If the project is in a debug build, enable debugging via SDK Layers.
 	{
-		winrt::com_ptr<ID3D12Debug> DbgCtrl;
-		ID3D12Debug* debugController;// = DbgCtrl.get();
+		winrt::com_ptr<ID3D12Debug> debugController;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 		{
 			debugController->EnableDebugLayer();
@@ -137,88 +120,74 @@ void DX::DeviceResources::CreateDeviceResources()
 	}
 #endif
 
-	//IDXGIFactory4* m_dxgiFactory = m_DxgiFactory.get();
-	DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory)));
-	//DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory2)));
-	winrt::com_ptr<IDXGIAdapter1> Adapter;
-	IDXGIAdapter1* adapter = Adapter.get();
-	GetHardwareAdapter(&adapter);
+DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory)));
 
-	//ID3D12Device* m_d3dDevice;// = m_D3dDevice.get();
-	// Create the Direct3D 12 API device object
-	HRESULT hr = D3D12CreateDevice(
-		adapter,					// The hardware adapter.
-		D3D_FEATURE_LEVEL_11_0,			// Minimum feature level this app can support.
-		IID_PPV_ARGS(&m_D3dDevice)		// Returns the Direct3D device created.
-		);
-	m_d3dDevice = m_D3dDevice.get();
+// Acquire adapter
+IDXGIAdapter1* adapterRaw = nullptr;
+GetHardwareAdapter(&adapterRaw);
+winrt::com_ptr<IDXGIAdapter1> adapter;
+if (adapterRaw)
+{
+	adapter.attach(adapterRaw);
+}
+
+// Create the Direct3D 12 API device object
+HRESULT hr = D3D12CreateDevice(
+	adapter.get(),                    // The hardware adapter.
+	D3D_FEATURE_LEVEL_11_0,           // Minimum feature level this app can support.
+	IID_PPV_ARGS(&m_D3dDevice)        // Returns the Direct3D device created.
+);
 
 #if defined(_DEBUG)
-	if (FAILED(hr))
-	{
-		// If the initialization fails, fall back to the WARP device.
-		// For more information on WARP, see: 
-		// https://go.microsoft.com/fwlink/?LinkId=286690
-
-		winrt::com_ptr<IDXGIAdapter> WarpAdapter;
-		IDXGIAdapter* warpAdapter = WarpAdapter.get();
-		DX::ThrowIfFailed(m_dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&warpAdapter)));
-
-		hr = D3D12CreateDevice(warpAdapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_D3dDevice));
-	}
+if (FAILED(hr))
+{
+	// If the initialization fails, fall back to the WARP device.
+	winrt::com_ptr<IDXGIAdapter> WarpAdapter;
+	winrt::check_hresult(m_DxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&WarpAdapter)));
+	hr = D3D12CreateDevice(WarpAdapter.get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_D3dDevice));
+}
 #endif
 
-	DX::ThrowIfFailed(hr);
+DX::ThrowIfFailed(hr);
 
-	// Create the command queue.
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	/*
-	DX::ThrowIfFailed(m_D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_CommandQueue)));
-	m_CommandQueue.attach(m_commandQueue);
-	//NAME_D3D12_OBJECT()
-		m_CommandQueue->SetName(L"CommandQueue");
-*/
-	DX::ThrowIfFailed(m_D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_CommandQueue)));
-	
-	//NAME_D3D12_OBJECT(m_commandQueue);
+// Create the command queue.
+D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+DX::ThrowIfFailed(m_D3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_CommandQueue)));
 
-	// Create descriptor heaps for render target views and depth stencil views.
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = c_frameCount;
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	DX::ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-	//NAME_D3D12_OBJECT(m_rtvHeap);
+// Create descriptor heaps for render target views and depth stencil views.
+D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+rtvHeapDesc.NumDescriptors = c_frameCount;
+rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+DX::ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_RtvHeap)));
 
-	m_rtvDescriptorSize = m_D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+m_rtvDescriptorSize = m_D3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
-	m_dsvHeap->SetName(L"m_dsvHeap");
-	
-	//ID3D12CommandAllocators** commandAllocators = m_commandAllocators[n];
+D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+dsvHeapDesc.NumDescriptors = 1;
+dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+DX::ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_DsvHeap)));
+m_DsvHeap->SetName(L"m_dsvHeap");
 
-	for (UINT n = 0; n < c_frameCount; n++)
-	{
-		DX::ThrowIfFailed(
-			m_D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandAllocators[n]))
-			);
-	}
+for (UINT n = 0; n < c_frameCount; n++)
+{
+	DX::ThrowIfFailed(
+		m_D3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandAllocators[n]))
+	);
+}
 
-	// Create synchronization objects.
-	DX::ThrowIfFailed(m_D3dDevice->CreateFence(m_fenceValues[m_currentFrame], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-	m_fenceValues[m_currentFrame]++;
+// Create synchronization objects.
+DX::ThrowIfFailed(m_D3dDevice->CreateFence(m_fenceValues[m_currentFrame], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence)));
+m_fenceValues[m_currentFrame]++;
 
-	m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-	if (m_fenceEvent == nullptr)
-	{
-		DX::ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-	}
+m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+if (m_fenceEvent == nullptr)
+{
+	DX::ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+}
 }
 
 // These resources need to be recreated every time the window size is changed.
@@ -230,7 +199,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 	// Clear the previous window size specific content and update the tracked fence values.
 	for (UINT n = 0; n < c_frameCount; n++)
 	{
-		m_renderTargets[n] = nullptr;
+		m_RenderTargets[n] = nullptr;
 		m_fenceValues[n] = m_fenceValues[m_currentFrame];
 	}
 
@@ -248,7 +217,24 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 	UINT backBufferWidth = lround(m_d3dRenderTargetSize.Width);
 	UINT backBufferHeight = lround(m_d3dRenderTargetSize.Height);
 
-	
+	if (m_SwapChain)
+	{
+		// If the swap chain already exists, resize it.
+		HRESULT hr = m_SwapChain->ResizeBuffers(c_frameCount, backBufferWidth, backBufferHeight, m_backBufferFormat, 0);
+
+		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+		{
+			// If the device was removed for any reason, a new device and swap chain will need to be created.
+			m_deviceRemoved = true;
+			return;
+		}
+		else
+		{
+			DX::ThrowIfFailed(hr);
+		}
+	}
+	else
+	{
 		// Otherwise, create a new one using the same adapter as the existing Direct3D device.
 		DXGI_SCALING scaling = DisplayMetrics::SupportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -267,99 +253,31 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 		winrt::com_ptr<::IUnknown> unk;
-		winrt::Windows::UI::Core::CoreWindow window = static_cast<winrt::Windows::UI::Core::CoreWindow>(m_window.get());
-		HRESULT hr = window.as(__uuidof(::IUnknown), unk.put_void());
-		unk.as(window);
-		if (SUCCEEDED(hr)) {
-                           //Successfully queried for IUnknown
-		}
-		winrt::com_ptr<IDXGISwapChain1> SwapChain;
-		
-		IDXGISwapChain1* swapChain;// = SwapChain.get();
-	
-		auto dev = m_CommandQueue.get();
-		auto win = m_window.get();
-		
-		//DX::ThrowIfFailed(
-		HRESULT swapH =
-		m_DxgiFactory->CreateSwapChainForCoreWindow(
-			dev,//m_commandQueue,								// Swap chains need a reference to the command queue in DirectX 12.
-			unk.get(),
-			&swapChainDesc,
-			nullptr,
-			&swapChain
-		);
-		DX::ThrowIfFailed(swapH);
-		
-		//SwapChain.copy_to(swapChain);
-		m_SwapChain.as(SwapChain);
-		//ThrowIfFailed(m_SwapChain.as(SwapChain));
-		m_swapChain = static_cast<IDXGISwapChain3*>(swapChain);
-	
 
-		
-			/* create swap chain for composition instead of core window
-			winrt::com_ptr<IDXGISwapChain1> swapChain1;
-			DX::ThrowIfFailed(m_DxgiFactory->CreateSwapChainForComposition(
-				m_CommandQueue.get(),
+		// Query CoreWindow IUnknown from stored agile_ref
+		auto windowObj = m_window.get();
+		winrt::Windows::UI::Core::CoreWindow* coreWindowPtr = &windowObj;
+		HRESULT hr = coreWindowPtr->as(__uuidof(::IUnknown), unk.put_void());
+		DX::ThrowIfFailed(hr);
+
+		winrt::com_ptr<IDXGISwapChain1> swapChain1;
+		DX::ThrowIfFailed(
+			m_DxgiFactory->CreateSwapChainForCoreWindow(
+				m_CommandQueue.get(),		// Swap chains need a reference to the command queue in DirectX 12.
+				unk.get(),
 				&swapChainDesc,
 				nullptr,
-				swapChain1.put()));
+				swapChain1.put()
+			)
+		);
 
-			winrt::com_ptr<IDXGISwapChain3> swapChain3;
-			DX::ThrowIfFailed(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain3)));
+		// Promote to IDXGISwapChain3
+		winrt::com_ptr<IDXGISwapChain3> swapChain3;
+		swapChain1.as(swapChain3);
+		m_SwapChain = swapChain3;
+	}
 
-			// Attach swapchain to SwapChainPanel via native interop
-			// Requires including "windows.ui.xaml.media.dxinterop.h" and using ISwapChainPanelNative
-			Microsoft::WRL::ComPtr<ISwapChainPanelNative> panelNative;
-			hr = reinterpret_cast<::IUnknown*>(winrt::get_abi(m_swapChainPanel))->QueryInterface(IID_PPV_ARGS(&panelNative));
-			if (FAILED(hr))
-			{
-				OutputDebugStringW(L"Failed to QI ISwapChainPanelNative for SwapChainPanel (will not attach swapchain)\n");
-				// Consider failing fast or returning so we don't attempt to use m_swapChain with an invalid panel.
-				return;
-			}
-
-			hr = panelNative->SetSwapChain(swapChain3.get());
-			if (FAILED(hr))
-			{
-				// Log the HRESULT for diagnosis — common failure: DCOMPOSITION_ERROR_WINDOW_ALREADY_COMPOSED
-				std::wstring buf = L"ISwapChainPanelNative::SetSwapChain failed, hr=0x";
-
-				wchar_t* item = new wchar_t[9];
-				_itow_s(hr, item, 9, 16);
-				_wcslwr_s(item, sizeof(item));
-				buf += std::wstring(item); // minimal formatting (or use std::wstringstream)
-				buf += L"\n";
-				OutputDebugStringW(buf.c_str());
-				return;
-			}
-			m_SwapChain = swapChain3;
-			m_swapChain = swapChain3.get();
-		*/
-		if (m_swapChain)
-		{
-			// If the swap chain already exists, resize it.
-			 hr = m_swapChain->ResizeBuffers(c_frameCount, backBufferWidth, backBufferHeight, m_backBufferFormat, 0);
-
-			if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
-			{
-				// If the device was removed for any reason, a new device and swap chain will need to be created.
-				m_deviceRemoved = true;
-
-				// Do not continue execution of this method. DeviceResources will be destroyed and re-created.
-				return;
-			}
-			else
-			{
-				DX::ThrowIfFailed(hr);
-			}
-		}
-		
-	// Set the proper orientation for the swap chain, and generate
-	// 3D matrix transformations for rendering to the rotated swap chain.
-	// The 3D matrix is specified explicitly to avoid rounding errors.
-
+	// Set the proper orientation for the swap chain, and generate 3D matrix transformations.
 	switch (displayRotation)
 	{
 	case DXGI_MODE_ROTATION_IDENTITY:
@@ -379,30 +297,26 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		break;
 
 	default:
-		 hr = S_OK;;
-		throw winrt::hresult_error(hr);
+		throw winrt::hresult_error(E_FAIL);
 	}
 
-	DX::ThrowIfFailed(
-		m_swapChain->SetRotation(displayRotation)
-		);
+	DX::ThrowIfFailed(m_SwapChain->SetRotation(displayRotation));
 
 	// Create render target views of the swap chain back buffer.
 	{
-		m_currentFrame = m_swapChain->GetCurrentBackBufferIndex();
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescriptor(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+		m_currentFrame = m_SwapChain->GetCurrentBackBufferIndex();
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescriptor(m_RtvHeap->GetCPUDescriptorHandleForHeapStart());
 		for (UINT n = 0; n < c_frameCount; n++)
 		{
-			
-			DX::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_RenderTargets[n])));
-			m_D3dDevice->CreateRenderTargetView(m_RenderTargets[n].get(), nullptr, rtvDescriptor);
+			DX::ThrowIfFailed(m_SwapChain->GetBuffer(n, IID_PPV_ARGS(&m_RenderTargets[n])));
+			ID3D12Resource* renderTarget = m_RenderTargets[n].get();
+			m_D3dDevice->CreateRenderTargetView(renderTarget, nullptr, rtvDescriptor);
 			rtvDescriptor.Offset(m_rtvDescriptorSize);
-			//ID3D12Resource* renderTarget = m_RenderTargets[n].get();
-			WCHAR name[25];
-			if (swprintf_s(name, L"m_RenderTargets[%u]", n) > 0)
+
+			WCHAR name[32];
+			if (swprintf_s(name, L"m_renderTargets[%u]", n) > 0)
 			{
-				DX::SetName(m_RenderTargets[n].get(), (LPCWSTR)name);
-				//m_RenderTargets[n].attach(renderTarget);
+				DX::SetName(renderTarget, name);
 			}
 		}
 	}
@@ -416,24 +330,23 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 
 		CD3DX12_CLEAR_VALUE depthOptimizedClearValue(m_depthBufferFormat, 1.0f, 0);
 
-		ThrowIfFailed(m_D3dDevice->CreateCommittedResource(
+		DX::ThrowIfFailed(m_D3dDevice->CreateCommittedResource(
 			&depthHeapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&depthResourceDesc,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE,
 			&depthOptimizedClearValue,
 			IID_PPV_ARGS(&m_DepthStencil)
-			));
+		));
 
 		m_D3dDevice->SetName(L"DepthStencil");
-		//NAME_D3D12_OBJECT(m_depthStencil);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 		dsvDesc.Format = m_depthBufferFormat;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-		m_D3dDevice->CreateDepthStencilView(m_DepthStencil.get(), &dsvDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+		m_D3dDevice->CreateDepthStencilView(m_DepthStencil.get(), &dsvDesc, m_DsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
 	// Set the 3D rendering viewport to target the entire window.
@@ -445,19 +358,13 @@ void DX::DeviceResources::UpdateRenderTargetSize()
 {
 	m_effectiveDpi = m_dpi;
 
-	// To improve battery life on high resolution devices, render to a smaller render target
-	// and allow the GPU to scale the output when it is presented.
 	if (!DisplayMetrics::SupportHighResolutions && m_dpi > DisplayMetrics::DpiThreshold)
 	{
 		float width = DX::ConvertDipsToPixels(m_logicalSize.Width, m_dpi);
 		float height = DX::ConvertDipsToPixels(m_logicalSize.Height, m_dpi);
 
-		// When the device is in portrait orientation, height > width. Compare the
-		// larger dimension against the width threshold and the smaller dimension
-		// against the height threshold.
 		if (max(width, height) > DisplayMetrics::WidthThreshold && min(width, height) > DisplayMetrics::HeightThreshold)
 		{
-			// To scale the app we change the effective DPI. Logical size does not change.
 			m_effectiveDpi /= 2.0f;
 		}
 	}
@@ -502,13 +409,11 @@ void DX::DeviceResources::SetDpi(float dpi)
 	{
 		m_dpi = dpi;
 
-		// When the display DPI changes, the logical size of the window (measured in Dips) also changes and needs to be updated.
-        
-        if (m_window)
-        {
-            auto windowObj = m_window.get();
-            m_logicalSize = winrt::Windows::Foundation::Size(windowObj.Bounds().Width, windowObj.Bounds().Height);
-        }
+		if (m_window)
+		{
+			auto windowObj = m_window.get();
+			m_logicalSize = winrt::Windows::Foundation::Size(windowObj.Bounds().Width, windowObj.Bounds().Height);
+		}
 
 		CreateWindowSizeDependentResources();
 	}
@@ -527,22 +432,14 @@ void DX::DeviceResources::SetCurrentOrientation(DisplayOrientations currentOrien
 // This method is called in the event handler for the DisplayContentsInvalidated event.
 void DX::DeviceResources::ValidateDevice()
 {
-	// The D3D Device is no longer valid if the default adapter changed since the device
-	// was created or if the device has been removed.
-
-	// First, get the LUID for the default adapter from when the device was created.
-
 	DXGI_ADAPTER_DESC previousDesc;
 	{
 		winrt::com_ptr<IDXGIAdapter1> previousDefaultAdapter;
-		IDXGIAdapter1* prevDefaultAdapter;
-		DX::ThrowIfFailed(m_dxgiFactory->EnumAdapters1(0, &prevDefaultAdapter));
-
-		DX::ThrowIfFailed(previousDefaultAdapter->GetDesc(&previousDesc));
+		IDXGIAdapter1* prevDefaultAdapter = nullptr;
+		DX::ThrowIfFailed(m_DxgiFactory->EnumAdapters1(0, &prevDefaultAdapter));
 		previousDefaultAdapter.attach(prevDefaultAdapter);
+		DX::ThrowIfFailed(previousDefaultAdapter->GetDesc(&previousDesc));
 	}
-
-	// Next, get the information for the current default adapter.
 
 	DXGI_ADAPTER_DESC currentDesc;
 	{
@@ -550,15 +447,11 @@ void DX::DeviceResources::ValidateDevice()
 		DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&currentDxgiFactory)));
 
 		winrt::com_ptr<IDXGIAdapter1> currentDefaultAdapter;
-		IDXGIAdapter1* curDefaultAdapter = currentDefaultAdapter.get();
+		IDXGIAdapter1* curDefaultAdapter = nullptr;
 		DX::ThrowIfFailed(currentDxgiFactory->EnumAdapters1(0, &curDefaultAdapter));
-
-		DX::ThrowIfFailed(currentDefaultAdapter->GetDesc(&currentDesc));
 		currentDefaultAdapter.attach(curDefaultAdapter);
+		DX::ThrowIfFailed(currentDefaultAdapter->GetDesc(&currentDesc));
 	}
-
-	// If the adapter LUIDs don't match, or if the device reports that it has been removed,
-	// a new D3D device must be created.
 
 	if (previousDesc.AdapterLuid.LowPart != currentDesc.AdapterLuid.LowPart ||
 		previousDesc.AdapterLuid.HighPart != currentDesc.AdapterLuid.HighPart ||
@@ -571,13 +464,17 @@ void DX::DeviceResources::ValidateDevice()
 // Present the contents of the swap chain to the screen.
 void DX::DeviceResources::Present()
 {
-	// The first argument instructs DXGI to block until VSync, putting the application
-	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
-	// frames that will never be displayed to the screen.
-	HRESULT hr = m_swapChain->Present(1, 0);
+	HRESULT hr = m_SwapChain->Present(1, 0);
+	if (FAILED(hr))
+	{
+		OutputDebugStringA("ERROR: IDXGISwapChain::Present FAILED: ");
+		char buf[64]; sprintf_s(buf, "%08X\n", static_cast<unsigned>(hr)); OutputDebugStringA(buf);
+	}
+	else
+	{
+		OutputDebugStringA("INFO: Present OK\n");
+	}
 
-	// If the device was removed either by a disconnection or a driver upgrade, we 
-	// must recreate all device resources.
 	if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 	{
 		m_deviceRemoved = true;
@@ -585,7 +482,6 @@ void DX::DeviceResources::Present()
 	else
 	{
 		DX::ThrowIfFailed(hr);
-
 		MoveToNextFrame();
 	}
 }
@@ -593,16 +489,11 @@ void DX::DeviceResources::Present()
 // Wait for pending GPU work to complete.
 void DX::DeviceResources::WaitForGpu()
 {
-	if (m_fence)
+	if (m_Fence)
 	{
-		// Schedule a Signal command in the queue.
-		DX::ThrowIfFailed(m_CommandQueue->Signal(m_fence, m_fenceValues[m_currentFrame]));
-
-		// Wait until the fence has been crossed.
-		DX::ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_currentFrame], m_fenceEvent));
+		DX::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.get(), m_fenceValues[m_currentFrame]));
+		DX::ThrowIfFailed(m_Fence->SetEventOnCompletion(m_fenceValues[m_currentFrame], m_fenceEvent));
 		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-
-		// Increment the fence value for the current frame.
 		m_fenceValues[m_currentFrame]++;
 	}
 }
@@ -610,27 +501,22 @@ void DX::DeviceResources::WaitForGpu()
 void DX::DeviceResources::RegisterDeviceNotify(IDeviceNotify* deviceNotify)
 {
 	m_deviceNotify = deviceNotify;
-	
 }
 
 // Prepare to render the next frame.
 void DX::DeviceResources::MoveToNextFrame()
 {
-	// Schedule a Signal command in the queue.
 	const UINT64 currentFenceValue = m_fenceValues[m_currentFrame];
-	DX::ThrowIfFailed(m_commandQueue->Signal(m_Fence.get(), currentFenceValue));
+	DX::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.get(), currentFenceValue));
 
-	// Advance the frame index.
-	m_currentFrame = m_swapChain->GetCurrentBackBufferIndex();
+	m_currentFrame = m_SwapChain->GetCurrentBackBufferIndex();
 
-	// Check to see if the next frame is ready to start.
-	if (m_fence->GetCompletedValue() < m_fenceValues[m_currentFrame])
+	if (m_Fence->GetCompletedValue() < m_fenceValues[m_currentFrame])
 	{
 		DX::ThrowIfFailed(m_Fence->SetEventOnCompletion(m_fenceValues[m_currentFrame], m_fenceEvent));
 		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 	}
 
-	// Set the fence value for the next frame.
 	m_fenceValues[m_currentFrame] = currentFenceValue + 1;
 }
 
@@ -640,8 +526,6 @@ DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
 {
 	DXGI_MODE_ROTATION rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
 
-	// Note: NativeOrientation can only be Landscape or Portrait even though
-	// the DisplayOrientations enum has other values.
 	switch (m_nativeOrientation)
 	{
 	case DisplayOrientations::Landscape:
@@ -650,15 +534,12 @@ DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
 		case DisplayOrientations::Landscape:
 			rotation = DXGI_MODE_ROTATION_IDENTITY;
 			break;
-
 		case DisplayOrientations::Portrait:
 			rotation = DXGI_MODE_ROTATION_ROTATE270;
 			break;
-
 		case DisplayOrientations::LandscapeFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE180;
 			break;
-
 		case DisplayOrientations::PortraitFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE90;
 			break;
@@ -671,15 +552,12 @@ DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
 		case DisplayOrientations::Landscape:
 			rotation = DXGI_MODE_ROTATION_ROTATE90;
 			break;
-
 		case DisplayOrientations::Portrait:
 			rotation = DXGI_MODE_ROTATION_IDENTITY;
 			break;
-
 		case DisplayOrientations::LandscapeFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE270;
 			break;
-
 		case DisplayOrientations::PortraitFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE180;
 			break;
@@ -693,9 +571,7 @@ DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
 // If no such adapter can be found, *ppAdapter will be set to nullptr.
 void DX::DeviceResources::GetHardwareAdapter(IDXGIAdapter1** ppAdapter)
 {
-	//winrt::com_ptr<IDXGIAdapter1> Adapter;
-	IDXGIAdapter1* adapter = nullptr;// Adapter.get();
-	//*ppAdapter = nullptr;
+	IDXGIAdapter1* adapter = nullptr;
 
 	for (UINT adapterIndex = 0; DXGI_ERROR_NOT_FOUND != m_DxgiFactory->EnumAdapters1(adapterIndex, &adapter); adapterIndex++)
 	{

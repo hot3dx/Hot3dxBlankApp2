@@ -361,3 +361,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ignores
+BKUP1/
+Common/BKUP/
+bin/
+obj/
+.vs/
+*.pdb
+*.user
+*.suo
+*.appx
+*.appxbundle

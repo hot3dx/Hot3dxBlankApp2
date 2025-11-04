@@ -90,7 +90,12 @@ namespace winrt::Hot3dxBlankApp2::implementation
         //void RotatePitch(float deg);
 
         
+
        // Resources used to render the DirectX content in the XAML page background.
+
+
+        // Resources used to render the DirectX content in the XAML page background.
+       
 
         winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swapChainPanel{ nullptr }; // member, not namespace-scope
         std::shared_ptr<DeviceResources> m_deviceResources;

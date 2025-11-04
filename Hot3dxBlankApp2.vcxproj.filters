@@ -14,13 +14,15 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainPage.cpp" />
-    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Hot3dxBlankApp2Main.cpp" />
     <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
       <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Generated Files\module.g.cpp">
+      <Filter>Generted Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -154,13 +156,16 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
-      <UniqueIdentifier>{e48dc53e-40b1-40cb-970a-f89935452892}</UniqueIdentifier>
+      <UniqueIdentifier>{77113BD3-97DA-48D2-BE02-716B4B21B3E2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Common">
-      <UniqueIdentifier>{9ce61b74-732b-42a6-874a-b5b69a077ede}</UniqueIdentifier>
+      <UniqueIdentifier>{DA961A36-7C8E-406F-BED0-ED0BD2E560D8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Content">
-      <UniqueIdentifier>{383a0cdf-4fc1-43c3-8591-4d24c52a11ae}</UniqueIdentifier>
+      <UniqueIdentifier>{9BE3377C-5884-4AE2-AC20-375B60AB0FAA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generted Files">
+      <UniqueIdentifier>{0A083132-A588-4922-920A-7AB754362097}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

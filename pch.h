@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-//#include <windows.h>
 #include <Unknwn.h>
 #include <Unknwnbase.h>
 // Add this before any #include <winrt/...> lines
@@ -32,19 +31,26 @@
 
 #include <wrl.h>
 #include <wrl/client.h>
+#include <wrl/module.h>    // <-- use WRL's StaticStorage / Module implementation
 #include <dxgi.h>
 #include <dxgi1_2.h>
 #include <dxgi1_3.h>
 #include <dxgi1_4.h>
+#include <dxgi1_5.h>
+#include <dxgi1_6.h>
 #include <d3d12.h>
 #include "Common\d3dx12.h"
 #include <pix.h>
 #include <DirectXColors.h>
 #include <DirectXMath.h>
 #include <memory>
-//#include <vector>
-//#include <agile.h>
+
+#include <algorithm>
 #include <concrt.h>
+
+using namespace Microsoft::WRL;
+using namespace DirectX;
+using namespace winrt;
 
 #if defined(_DEBUG)
  #include <dxgidebug.h>
