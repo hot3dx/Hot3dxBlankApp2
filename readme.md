@@ -23,3 +23,10 @@ http://aka.ms/cppwinrt/
 ========================================================================
 
 ![Hot3dxBlankApp2 Working Program Screenshot](./Assets/Halloween10_31_2025__4_49_pm.png)
+
+
+This is similar to Hot3dxBlankApp2WinrtVS2026 Repository except it was created in the Visual Studio 2022 Enterprise to toolset v143.
+
+This is a C17/C++20, UWP XAML Windows 10 & 11 Builds 10.0.19041 to 10.0.26100
+
+using Visual Studio version 17.14.19
