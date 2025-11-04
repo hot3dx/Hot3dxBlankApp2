@@ -65,6 +65,8 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
 
         if (e.PrelaunchActivated() == false)
         {
+            try
+            {
             if (rootFrame.Content() == nullptr)
             {
                 // When the navigation stack isn't restored navigate to the first page,
@@ -76,6 +78,21 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
             Window::Current().Content(rootFrame);
             // Ensure the current window is active
             Window::Current().Activate();
+            }
+            catch (winrt::hresult_error const& hr)
+            {
+                std::wstring out = L"OnLaunched exception: ";
+                // Use the exception's message (hresult_error::message()).
+                out += hr.message().c_str();
+
+                // Append numeric HRESULT for diagnostics.
+                out += L" (hr=";
+                out += std::to_wstring(static_cast<int32_t>(hr.code()));
+                out += L")\n";
+
+                OutputDebugStringW(out.c_str());
+                throw; // or keep handled(false) while diagnosing
+            }
         }
     }
     else

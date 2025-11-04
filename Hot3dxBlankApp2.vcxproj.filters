@@ -166,6 +166,7 @@
   <ItemGroup>
     <None Include="PropertySheet.props" />
     <None Include="packages.config" />
+    <None Include="Hot3dxStyles.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

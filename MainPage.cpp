@@ -9,31 +9,39 @@ using namespace winrt::Hot3dxBlankApp2;
 
 namespace winrt::Hot3dxBlankApp2::implementation
 {
-    // Example: Create a SwapChainPanel object in code
-    SwapChainPanel m_swapChainPanel{ nullptr };
-
     MainPage::MainPage()
     {
+        // create DeviceResources first
+        m_deviceResources = std::make_shared<DeviceResources>();
+
+        // create the SwapChainPanel instance (member) and hook Loaded
+        m_swapChainPanel = swapChainPanel();
+        swapChainPanel().Loaded({ this, &MainPage::OnSwapChainPanelLoaded });
+
+        // add the panel to the visual tree
+        Content(m_swapChainPanel);
+
+        // mark window invisible until ready
         m_windowVisible = false;
-        // If you want to create it in code (not XAML)
-        m_swapChainPanel = SwapChainPanel();
-        // Optionally, set properties
-        m_swapChainPanel.Width(2500);
-        m_swapChainPanel.Height(1600);
-        m_swapChainPanel.Visibility(Visibility::Visible);
+    }
 
-        // If you want to add it to the visual tree, for example:
-         Content(m_swapChainPanel);
+    void MainPage::OnSwapChainPanelLoaded(winrt::Windows::Foundation::IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*args*/)
+    {
+        // safe to call interop / size dependent initialization now
+        auto window = Window::Current();
+        m_deviceResources->SetWindow(window.CoreWindow());
 
-         m_deviceResources = std::make_shared<DeviceResources>();
-         auto window = Window::Current();
-         m_deviceResources->SetWindow(window.CoreWindow());
-         m_deviceResources->SetSwapChainPanel(&m_swapChainPanel, window.CoreWindow());
-        
-         
-         m_main = std::unique_ptr<Hot3dxBlankApp2Main>(new Hot3dxBlankApp2Main(m_deviceResources));
+        // Give DeviceResources the panel (it should call SetSwapChain / ISwapChainPanelNative inside)
+        m_deviceResources->SetSwapChainPanel(&swapChainPanel(), window.CoreWindow());
 
-//         m_main->Render();
+        // create/render only after swapchain panel is attached
+        m_main = std::make_unique<Hot3dxBlankApp2Main>(m_deviceResources);
+        m_main->CreateRenderers(m_deviceResources);
+
+        m_windowVisible = true;
+
+        // Do one frame (or start your render loop)
+        m_main->Render();
     }
 
     int32_t MainPage::MyProperty()

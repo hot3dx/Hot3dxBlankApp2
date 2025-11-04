@@ -63,8 +63,8 @@ winrt::Windows::Foundation::IAsyncAction Sample3DSceneRenderer::CreateDeviceDepe
 
 	// Create a root signature with a single constant buffer slot.
 	{
-		CD3DX12_DESCRIPTOR_RANGE range;
-		CD3DX12_ROOT_PARAMETER parameter;
+		CD3DX12_DESCRIPTOR_RANGE range{};
+		CD3DX12_ROOT_PARAMETER parameter{};
 
 		range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 		parameter.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY_VERTEX);
@@ -76,7 +76,7 @@ winrt::Windows::Foundation::IAsyncAction Sample3DSceneRenderer::CreateDeviceDepe
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
-		CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
+		CD3DX12_ROOT_SIGNATURE_DESC descRootSignature{};
 		descRootSignature.Init(1, &parameter, 0, nullptr, rootSignatureFlags);
 
 		winrt::com_ptr<ID3DBlob> pSignature;

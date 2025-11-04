@@ -15,6 +15,7 @@
 #include <winrt/windows.graphics.display.h>
 #include <winrt/windows.ui.core.h>
 #include <winrt/windows.ui.xaml.controls.h>
+//#include <windows.ui.xaml.media.dxinterop.h>
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -112,7 +113,7 @@ void DX::DeviceResources::SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::
 	m_currentOrientation = currentDisplayInformation.CurrentOrientation();
 	m_dpi = currentDisplayInformation.LogicalDpi();
 
-	//CreateWindowSizeDependentResources();
+	CreateWindowSizeDependentResources();
 
 }
 
@@ -138,7 +139,7 @@ void DX::DeviceResources::CreateDeviceResources()
 
 	//IDXGIFactory4* m_dxgiFactory = m_DxgiFactory.get();
 	DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory)));
-
+	//DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DxgiFactory2)));
 	winrt::com_ptr<IDXGIAdapter1> Adapter;
 	IDXGIAdapter1* adapter = Adapter.get();
 	GetHardwareAdapter(&adapter);
@@ -150,7 +151,7 @@ void DX::DeviceResources::CreateDeviceResources()
 		D3D_FEATURE_LEVEL_11_0,			// Minimum feature level this app can support.
 		IID_PPV_ARGS(&m_D3dDevice)		// Returns the Direct3D device created.
 		);
-	  //m_D3dDevice.attach(m_d3dDevice);
+	m_d3dDevice = m_D3dDevice.get();
 
 #if defined(_DEBUG)
 	if (FAILED(hr))
@@ -247,26 +248,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 	UINT backBufferWidth = lround(m_d3dRenderTargetSize.Width);
 	UINT backBufferHeight = lround(m_d3dRenderTargetSize.Height);
 
-	if (m_swapChain)
-	{
-		// If the swap chain already exists, resize it.
-		HRESULT hr = m_swapChain->ResizeBuffers(c_frameCount, backBufferWidth, backBufferHeight, m_backBufferFormat, 0);
-
-		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
-		{
-			// If the device was removed for any reason, a new device and swap chain will need to be created.
-			m_deviceRemoved = true;
-
-			// Do not continue execution of this method. DeviceResources will be destroyed and re-created.
-			return;
-		}
-		else
-		{
-			DX::ThrowIfFailed(hr);
-		}
-	}
-	else
-	{
+	
 		// Otherwise, create a new one using the same adapter as the existing Direct3D device.
 		DXGI_SCALING scaling = DisplayMetrics::SupportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -285,34 +267,95 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 		winrt::com_ptr<::IUnknown> unk;
-		
-		auto pWindow = m_window.get();// unk.get();
-		
-		winrt::Windows::UI::Core::CoreWindow* window = &pWindow;
-		HRESULT hr = window->as(__uuidof(::IUnknown), unk.put_void());
-		//HRESULT hr = pWindow->QueryInterface(__uuidof(::IUnknown), unk.put_void());
+		winrt::Windows::UI::Core::CoreWindow window = static_cast<winrt::Windows::UI::Core::CoreWindow>(m_window.get());
+		HRESULT hr = window.as(__uuidof(::IUnknown), unk.put_void());
+		unk.as(window);
 		if (SUCCEEDED(hr)) {
-			// Successfully queried for IUnknown
+                           //Successfully queried for IUnknown
 		}
 		winrt::com_ptr<IDXGISwapChain1> SwapChain;
 		
 		IDXGISwapChain1* swapChain;// = SwapChain.get();
-		DX::ThrowIfFailed(
-			m_DxgiFactory->CreateSwapChainForCoreWindow(
-				m_commandQueue,								// Swap chains need a reference to the command queue in DirectX 12.
-				unk.get(),
-				&swapChainDesc,
-				nullptr,
-				&swapChain
-				)
-			);
-
+	
+		auto dev = m_CommandQueue.get();
+		auto win = m_window.get();
+		
+		//DX::ThrowIfFailed(
+		HRESULT swapH =
+		m_DxgiFactory->CreateSwapChainForCoreWindow(
+			dev,//m_commandQueue,								// Swap chains need a reference to the command queue in DirectX 12.
+			unk.get(),
+			&swapChainDesc,
+			nullptr,
+			&swapChain
+		);
+		DX::ThrowIfFailed(swapH);
+		
 		//SwapChain.copy_to(swapChain);
 		m_SwapChain.as(SwapChain);
 		//ThrowIfFailed(m_SwapChain.as(SwapChain));
 		m_swapChain = static_cast<IDXGISwapChain3*>(swapChain);
-	}
+	
 
+		
+			/* create swap chain for composition instead of core window
+			winrt::com_ptr<IDXGISwapChain1> swapChain1;
+			DX::ThrowIfFailed(m_DxgiFactory->CreateSwapChainForComposition(
+				m_CommandQueue.get(),
+				&swapChainDesc,
+				nullptr,
+				swapChain1.put()));
+
+			winrt::com_ptr<IDXGISwapChain3> swapChain3;
+			DX::ThrowIfFailed(swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain3)));
+
+			// Attach swapchain to SwapChainPanel via native interop
+			// Requires including "windows.ui.xaml.media.dxinterop.h" and using ISwapChainPanelNative
+			Microsoft::WRL::ComPtr<ISwapChainPanelNative> panelNative;
+			hr = reinterpret_cast<::IUnknown*>(winrt::get_abi(m_swapChainPanel))->QueryInterface(IID_PPV_ARGS(&panelNative));
+			if (FAILED(hr))
+			{
+				OutputDebugStringW(L"Failed to QI ISwapChainPanelNative for SwapChainPanel (will not attach swapchain)\n");
+				// Consider failing fast or returning so we don't attempt to use m_swapChain with an invalid panel.
+				return;
+			}
+
+			hr = panelNative->SetSwapChain(swapChain3.get());
+			if (FAILED(hr))
+			{
+				// Log the HRESULT for diagnosis — common failure: DCOMPOSITION_ERROR_WINDOW_ALREADY_COMPOSED
+				std::wstring buf = L"ISwapChainPanelNative::SetSwapChain failed, hr=0x";
+
+				wchar_t* item = new wchar_t[9];
+				_itow_s(hr, item, 9, 16);
+				_wcslwr_s(item, sizeof(item));
+				buf += std::wstring(item); // minimal formatting (or use std::wstringstream)
+				buf += L"\n";
+				OutputDebugStringW(buf.c_str());
+				return;
+			}
+			m_SwapChain = swapChain3;
+			m_swapChain = swapChain3.get();
+		*/
+		if (m_swapChain)
+		{
+			// If the swap chain already exists, resize it.
+			 hr = m_swapChain->ResizeBuffers(c_frameCount, backBufferWidth, backBufferHeight, m_backBufferFormat, 0);
+
+			if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+			{
+				// If the device was removed for any reason, a new device and swap chain will need to be created.
+				m_deviceRemoved = true;
+
+				// Do not continue execution of this method. DeviceResources will be destroyed and re-created.
+				return;
+			}
+			else
+			{
+				DX::ThrowIfFailed(hr);
+			}
+		}
+		
 	// Set the proper orientation for the swap chain, and generate
 	// 3D matrix transformations for rendering to the rotated swap chain.
 	// The 3D matrix is specified explicitly to avoid rounding errors.
@@ -336,7 +379,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		break;
 
 	default:
-		HRESULT hr = S_OK;;
+		 hr = S_OK;;
 		throw winrt::hresult_error(hr);
 	}
 
@@ -350,16 +393,16 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescriptor(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 		for (UINT n = 0; n < c_frameCount; n++)
 		{
-			ID3D12Resource* renderTarget = m_RenderTargets[n].get();
-			DX::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n])));
-			m_D3dDevice->CreateRenderTargetView(renderTarget, nullptr, rtvDescriptor);
+			
+			DX::ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_RenderTargets[n])));
+			m_D3dDevice->CreateRenderTargetView(m_RenderTargets[n].get(), nullptr, rtvDescriptor);
 			rtvDescriptor.Offset(m_rtvDescriptorSize);
-
+			//ID3D12Resource* renderTarget = m_RenderTargets[n].get();
 			WCHAR name[25];
-			if (swprintf_s(name, L"m_renderTargets[%u]", n) > 0)
+			if (swprintf_s(name, L"m_RenderTargets[%u]", n) > 0)
 			{
-				DX::SetName(renderTarget, name);
-				m_RenderTargets[n].attach(renderTarget);
+				DX::SetName(m_RenderTargets[n].get(), (LPCWSTR)name);
+				//m_RenderTargets[n].attach(renderTarget);
 			}
 		}
 	}

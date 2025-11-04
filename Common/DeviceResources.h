@@ -90,6 +90,8 @@ namespace DX
 		ID3D12Device*                           m_d3dDevice;
 		winrt::com_ptr<IDXGIFactory4>			m_DxgiFactory;
 		IDXGIFactory4*                          m_dxgiFactory;
+		winrt::com_ptr<IDXGIFactory2>			m_DxgiFactory2;
+		IDXGIFactory2*                          m_dxgiFactory2;
 		winrt::com_ptr<IDXGISwapChain3>			m_SwapChain;
 		IDXGISwapChain3*                        m_swapChain;
 		winrt::com_ptr<ID3D12Resource>			m_RenderTargets[c_frameCount];
