@@ -49,8 +49,10 @@ namespace winrt::Hot3dxBlankApp2::implementation
     struct MainPage : MainPageT<MainPage>
     {
         MainPage();
-       
 
+        void OnSwapChainPanelSizeChanged(winrt::Windows::Foundation::IInspectable const&, winrt::Windows::UI::Xaml::SizeChangedEventArgs const& args);
+
+        static MainPage* Current;
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
@@ -77,32 +79,27 @@ namespace winrt::Hot3dxBlankApp2::implementation
         void OnPointerExited(winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const e);
         void OnPointerCaptureLost(winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const e);
 
-        
+
         void OnKeyDown(Windows::UI::Xaml::Input::KeyRoutedEventArgs const& args);
         void OnKeyUp(Windows::UI::Xaml::Input::KeyRoutedEventArgs  const& args);
-        
-        
+
+
         ///////////////////////
-	private:
-        
+    private:
+
         //void RotateYaw(float deg);
 
         //void RotatePitch(float deg);
 
-        
-
-       // Resources used to render the DirectX content in the XAML page background.
-
 
         // Resources used to render the DirectX content in the XAML page background.
-       
 
         winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swapChainPanel{ nullptr }; // member, not namespace-scope
         std::shared_ptr<DeviceResources> m_deviceResources;
         std::unique_ptr<Hot3dxBlankApp2Main> m_main;
         bool m_windowVisible{ false };
-       
-       
+
+
     };
 }
 

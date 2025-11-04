@@ -21,3 +21,5 @@ Steps:
 Learn more about C++/WinRT here:
 http://aka.ms/cppwinrt/
 ========================================================================
+
+![Hot3dxBlankApp2 Working Program Screenshot](./Assets/Halloween10_31_2025__4_49_pm.png)

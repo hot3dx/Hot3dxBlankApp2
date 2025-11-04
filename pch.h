@@ -3,9 +3,6 @@
 #include <Unknwn.h>
 #include <Unknwnbase.h>
 // Add this before any #include <winrt/...> lines
-
-
-
 #include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -53,5 +50,5 @@ using namespace DirectX;
 using namespace winrt;
 
 #if defined(_DEBUG)
- #include <dxgidebug.h>
+#include <dxgidebug.h>
 #endif
