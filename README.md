@@ -8,6 +8,8 @@ This is a C17/C++20, UWP XAML Windows 10 & 11 Builds 10.0.19041 to 10.0.26100
 
 using Visual Studio version 17.14.20
 
+Set for batch builds of Release an Debug win32(x86) and x64
+
 ========================================================================
     C++/WinRT Hot3dxBlankApp2 Project Overview
 ========================================================================
@@ -49,4 +51,5 @@ Known Issues:
 - If you encounter build errors related to missing headers or libraries, 
   verify that the C++/WinRT extension is installed in Visual Studio.
 - If you experience issues with XAML designer or IntelliSense, try restarting Visual Studio or rebuilding the project.
+
 
