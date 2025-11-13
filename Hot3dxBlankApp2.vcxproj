@@ -6,7 +6,7 @@
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
     <MinimalCoreWin>true</MinimalCoreWin>
-    <ProjectGuid>{A76B6A9B-3803-4415-9326-0D3C2E152914}</ProjectGuid>
+    <ProjectGuid>{a76b6a9b-3803-4415-9326-0dcC2e152914}</ProjectGuid>
     <ProjectName>Hot3dxBlankApp2</ProjectName>
     <RootNamespace>Hot3dxBlankApp2</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -80,9 +80,27 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="PropertySheet.props" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+    <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\Hot3dx\Projects\Hot3dxBlankApp2\packages\WinPixEventRuntime.1.0.240308001;D:\Hot3dx\Projects\Hot3dxBlankApp2\packages\Microsoft.Windows.CppWinRT.2.0.220531.1;$(IncludePath)</IncludePath>
+    <IncludePath>$(Solution)\packages\WinPixEventRuntime.1.0.240308001;$(Solution)\packages\Microsoft.Windows.CppWinRT.2.0.220531.1;$(Solution)\packages\MicrosoftWebWebView2.1.0.3595.46;$(IncludePath)$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(Solution)\packages\WinPixEventRuntime.1.0.240308001;$(Solution)\packages\Microsoft.Windows.CppWinRT.2.0.220531.1;$(Solution)\packages\MicrosoftWebWebView2.1.0.3595.46;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(Solution)\packages\WinPixEventRuntime.1.0.240308001;$(Solution)\packages\Microsoft.Windows.CppWinRT.2.0.220531.1;$(Solution)\packages\MicrosoftWebWebView2.1.0.3595.46;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(Solution)\packages\WinPixEventRuntime.1.0.240308001;$(Solution)\packages\Microsoft.Windows.CppWinRT.2.0.220531.1;$(Solution)\packages\MicrosoftWebWebView2.1.0.3595.46;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -103,6 +121,10 @@
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc17</LanguageStandard_C>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsWinRT>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp20</LanguageStandard>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</MultiProcessorCompilation>
     </ClCompile>
     <FxCompile>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
@@ -110,12 +132,9 @@
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Link>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-    <Link>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
+    <FxCompile>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+    </FxCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -123,15 +142,35 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp20</LanguageStandard>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdc17</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">d3d12.lib;d3d11.lib;dxgi.lib;dxguid.lib;d2d1.lib;windowscodecs.lib; dwrite.lib;xaudio2.lib;xinput.lib;mfcore.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mincore.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DisableOptimizations>
+    </FxCompile>
+    <FxCompile>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableDebuggingInformation>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+    </FxCompile>
+    <FxCompile>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DisableOptimizations>
+    </FxCompile>
+    <FxCompile>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableDebuggingInformation>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common\d3dx12.h" />
@@ -149,6 +188,13 @@
     <ClInclude Include="MainPage.h">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="Scenario1.h">
+      <DependentUpon>Scenario1.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="Scenario2.h">
+      <DependentUpon>Scenario2.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="ScenariosConfigurations.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -158,7 +204,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
+    <None Include="packages.config" />
+    <None Include="PrivacyPolicy.md" />
+    <None Include="README.md" />
+    <None Include="scripts\create_vs_offline.cmd" />
     <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scenario1.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scenario2.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -168,7 +224,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Halloween10_31_2025__4_49_pm.png" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
     <Image Include="Assets\MakerC1.ico" />
     <Image Include="Assets\splash-windows-sdk.scale-100.png" />
@@ -221,6 +276,13 @@
     <ClCompile Include="MainPage.cpp">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="Scenario1.cpp">
+      <DependentUpon>Scenario1.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="Scenario2.cpp">
+      <DependentUpon>Scenario2.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="ScenariosConfigurations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl">
@@ -229,13 +291,15 @@
     <Midl Include="MainPage.idl">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Midl>
+    <Midl Include="Scenario1.idl">
+      <DependentUpon>Scenario1.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="Scenario2.idl">
+      <DependentUpon>Scenario2.xaml</DependentUpon>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="PropertySheet.props" />
-    <Text Include="readme.md">
-      <DeploymentContent>false</DeploymentContent>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\SamplePixelShader.hlsl">
@@ -244,24 +308,12 @@
       <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableDebuggingInformation>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DisableOptimizations>
       <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableDebuggingInformation>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">5.1</ShaderModel>
-      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</DisableOptimizations>
-      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</EnableDebuggingInformation>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">5.1</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">5.1</ShaderModel>
-      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DisableOptimizations>
-      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</EnableDebuggingInformation>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Content\SampleVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -271,37 +323,28 @@
       <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableDebuggingInformation>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">5.1</ShaderModel>
-      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</DisableOptimizations>
-      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</EnableDebuggingInformation>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">5.1</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">5.1</ShaderModel>
-      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DisableOptimizations>
-      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</EnableDebuggingInformation>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">5.1</ShaderModel>
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DisableOptimizations>
       <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableDebuggingInformation>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Package.StoreAssociation.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(Solution)\packages\Microsoft.Web.WebView2.1.0.2849.39\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.2849.39\build\native\Microsoft.Web.WebView2.targets')" />
     <Import Project="$(Solution)\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" />
     <Import Project="$(Solution)\packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets')" />
+    <Import Project="packages\Microsoft.Web.WebView2.1.0.3595.46\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.3595.46\build\native\Microsoft.Web.WebView2.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.2849.39\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.2849.39\build\native\Microsoft.Web.WebView2.targets'))" />
     <Error Condition="!Exists('packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.250303.1\build\native\Microsoft.Windows.CppWinRT.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3595.46\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3595.46\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
 </Project>
