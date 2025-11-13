@@ -41,7 +41,7 @@ namespace DX
 		winrt::Windows::Storage::Streams::IBuffer buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		co_return buffer; // <-- Return the IBuffer directly
 	}
-
+	
 	// Converts a length in device-independent pixels (DIPs) to a length in physical pixels.
 	inline float ConvertDipsToPixels(float dips, float dpi)
 	{
